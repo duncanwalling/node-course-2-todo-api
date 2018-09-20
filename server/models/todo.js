@@ -17,6 +17,7 @@ var Todo = mongoose.model('Todo', {
     }
 });
 
+
 // var newTodo = new Todo({
 //     text: 'Digest dinner'
 // });
