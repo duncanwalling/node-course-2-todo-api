@@ -100,10 +100,22 @@ app.post('/users', (req, res) => {
     var body = _.pick(req.body, ['email', 'password']);
     var user = new User(body);
 
-    user.save().then((user) => {
-        res.send(user);
-    }, (e) => {
-        res.status(400).send(e);
+    // check if email already exists
+    User.findOne({email: body.email, archived: false}).then((doc)=> {
+       if(!doc)
+       {
+           user.save().then(() => {
+              return user.generateAuthToken();
+           }).then((token) => {
+               res.header('x-auth', token).send(user);
+           }).catch((e) => {
+           res.status(400).send(e);
+       });
+       }
+        else
+       {
+           return res.status(403).send('Already a user with that email address');
+       }
     });
 });
 
