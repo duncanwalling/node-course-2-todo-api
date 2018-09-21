@@ -7,22 +7,6 @@ const {User} = require('./../../models/user');
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
 
-const todos = [{
-    _id: new ObjectID(),
-    text: 'First test todo'
-}, {
-    _id: new ObjectID(),
-    text: 'Second test todo',
-    completed: true,
-    completedAt: 123
-}];
-
-const populateTodos = (done) => {
-    Todo.deleteMany({}).then(() => {
-        return Todo.insertMany(todos);
-    }).then(() => done());
-};
-
 const users = [{
     _id: userOneId,
     email: 'test@duncanwalling.com',
@@ -34,7 +18,11 @@ const users = [{
 }, {
     _id: userTwoId,
     email: 'test2@duncanwalling.com',
-    password: 'userTwoPass'
+    password: 'userTwoPass',
+    tokens: [{
+        access: 'auth',
+        token: jwt.sign({_id: userTwoId, access: 'auth'}, 'abc123').toString()
+    }]
 }];
 
 const populateUsers = (done) => {
@@ -44,6 +32,24 @@ const populateUsers = (done) => {
         var userTwo = new User(users[1]).save();
 
         return Promise.all([userOne, userTwo]);
+    }).then(() => done());
+};
+
+const todos = [{
+    _id: new ObjectID(),
+    text: 'First test todo',
+    _creator: userOneId
+}, {
+    _id: new ObjectID(),
+    text: 'Second test todo',
+    completed: true,
+    completedAt: 123,
+    _creator: userTwoId
+}];
+
+const populateTodos = (done) => {
+    Todo.deleteMany({}).then(() => {
+        return Todo.insertMany(todos);
     }).then(() => done());
 };
 
