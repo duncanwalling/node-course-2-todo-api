@@ -50,6 +50,9 @@ UserSchema.methods.toJSON = function () {
 
 
 UserSchema.methods.generateAuthToken = function () {
+    // should you clear the token here - this would prevent multiple tokens and logging in twice from different machines
+    // or could just have a clean up here
+
     var user = this;
     var access = 'auth';
     var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
@@ -58,6 +61,16 @@ UserSchema.methods.generateAuthToken = function () {
     return user.save().then(() => {
         return token;
     });
+};
+
+UserSchema.methods.removeToken = function (token) {
+  var user = this;
+
+  return user.updateOne({
+      $pull: {
+          tokens: {token}
+      }
+  });
 };
 
 UserSchema.pre('save', function (next) {
